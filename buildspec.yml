@@ -2,24 +2,37 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      python: 3.11
     commands:
-      - echo "Installing dependencies..."
-      - make install
+      - echo "Setting up multiple Python versions..."
+      - pyenv install 3.9.18 || true
+      - pyenv install 3.10.13 || true
+      - pyenv install 3.11.7 || true
 
   pre_build:
     commands:
-      - echo "Running lint..."
+      - echo "Linting with Python 3.11..."
+      - pyenv local 3.11.7
+      - make install
       - make lint
-      - echo "Checking formatting..."
       - black --check *.py
 
   build:
     commands:
-      - echo "Running tests..."
+      - echo "=== Testing with Python 3.9 ==="
+      - pyenv local 3.9.18
+      - make install
+      - make test
+
+      - echo "=== Testing with Python 3.10 ==="
+      - pyenv local 3.10.13
+      - make install
+      - make test
+
+      - echo "=== Testing with Python 3.11 ==="
+      - pyenv local 3.11.7
+      - make install
       - make test
 
   post_build:
     commands:
-      - echo "Build completed successfully!"
+      - echo "All Python versions passed!"
