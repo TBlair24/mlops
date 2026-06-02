@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Installing dependencies..."
+      - make install
+
+  pre_build:
+    commands:
+      - echo "Running lint..."
+      - make lint
+      - echo "Checking formatting..."
+      - black --check *.py
+
+  build:
+    commands:
+      - echo "Running tests..."
+      - make test
+
+  post_build:
+    commands:
+      - echo "Build completed successfully!"
