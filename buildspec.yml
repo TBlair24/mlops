@@ -1,38 +1,40 @@
 version: 0.2
 
+env:
+  variables:
+    AWS_DEFAULT_REGION: "us-east-1"
+    IMAGE_REPO_NAME: "practical-mlops-exercises"
+    IMAGE_TAG: "latest"
+
 phases:
   install:
+    runtime-versions:
+      python: 3.11
     commands:
-      - echo "Setting up multiple Python versions..."
-      - pyenv install 3.9.18 || true
-      - pyenv install 3.10.13 || true
-      - pyenv install 3.11.7 || true
+      - echo "Installing dependencies..."
+      - make install
 
   pre_build:
     commands:
-      - echo "Linting with Python 3.11..."
-      - pyenv local 3.11.7
-      - make install
+      - echo "Running lint and format check..."
       - make lint
       - black --check *.py
+      - echo "Running tests..."
+      - make test
+      - echo "Logging in to Amazon ECR..."
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
 
   build:
     commands:
-      - echo "=== Testing with Python 3.9 ==="
-      - pyenv local 3.9.18
-      - make install
-      - make test
-
-      - echo "=== Testing with Python 3.10 ==="
-      - pyenv local 3.10.13
-      - make install
-      - make test
-
-      - echo "=== Testing with Python 3.11 ==="
-      - pyenv local 3.11.7
-      - make install
-      - make test
+      - echo "Building Docker image..."
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo "All Python versions passed!"
+      - echo "Pushing Docker image to ECR..."
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo "Docker image pushed successfully!"
