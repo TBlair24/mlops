@@ -22,19 +22,16 @@ phases:
       - echo "Running tests..."
       - make test
       - echo "Logging in to Amazon ECR..."
-      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 568256617374.dkr.ecr.eu-north-1.amazonaws.com
 
   build:
     commands:
       - echo "Building Docker image..."
-      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG 568256617374.dkr.ecr.eu-north-1.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
   post_build:
     commands:
       - echo "Pushing Docker image to ECR..."
-      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker push 568256617374.dkr.ecr.eu-north-1.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - echo "Docker image pushed successfully!"
