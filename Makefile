@@ -11,4 +11,7 @@ format:
 test:
 	python -m pytest -vv --cov=hello test_hello.py
 
+loadtest:
+	bash run_loadtest.sh
+
 all: install lint format test

@@ -1,0 +1,37 @@
+name: Staging - Load Test
+
+on:
+    push:
+        branches: [ staging ]
+
+jobs:
+    test-and-loadtest:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+
+            - name: Install dependencies
+              run: make install
+
+            - name: Lint
+              run: make lint
+
+            - name: Format check
+              run: black --check *.py
+
+            - name: Run unit tests
+              run: make test
+
+            - name: Run load tests
+              run: bash run_load_tests.sh
+
+            - name: Upload load test results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                name: loadtest-results
+                path: loadtest_results_*csv
