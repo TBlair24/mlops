@@ -1,5 +1,6 @@
 from locust import HttpUser, task, between
 
+
 class MLOpsUser(HttpUser):
     """Simulates a user interacting with the MLOps application."""
 
